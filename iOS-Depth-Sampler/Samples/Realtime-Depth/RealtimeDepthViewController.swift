@@ -20,7 +20,7 @@ class RealtimeDepthViewController: UIViewController {
     @IBOutlet weak var equalizeSwitch: UISwitch!
 
     private var videoCapture: VideoCapture!
-    var currentCameraType: CameraType = .back(true)
+    var currentCameraType: CameraType = .front(true)
     private let serialQueue = DispatchQueue(label: "com.shi.depthSampler.queue")
 
     private var renderer: MetalRenderer!
@@ -88,7 +88,42 @@ class RealtimeDepthViewController: UIViewController {
         mtkView.delegate = nil
         super.viewWillDisappear(animated)
     }
-    
+
+    @IBAction func shareVideo(_ sender: UIButton) {
+        guard let videoCapture = videoCapture else {return}
+
+        if (mtkView.delegate != nil) {
+            videoCapture.imageBufferHandler = nil
+            videoCapture.stopCapture()
+            mtkView.delegate = nil
+        }
+
+        let videoLink = videoCapture.outputFileLocation
+
+        let objectsToShare = [videoLink] //comment!, imageData!, myWebsite!]
+        let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+
+        activityVC.setValue("Video", forKey: "subject")
+
+
+        //New Excluded Activities Code
+        activityVC.excludedActivityTypes = [
+            UIActivity.ActivityType.airDrop,
+            UIActivity.ActivityType.addToReadingList,
+            UIActivity.ActivityType.assignToContact,
+            UIActivity.ActivityType.copyToPasteboard,
+            UIActivity.ActivityType.mail,
+            UIActivity.ActivityType.message,
+            UIActivity.ActivityType.openInIBooks,
+            UIActivity.ActivityType.postToTencentWeibo,
+            UIActivity.ActivityType.postToVimeo,
+            UIActivity.ActivityType.postToWeibo,
+            UIActivity.ActivityType.print]
+
+
+        self.present(activityVC, animated: true, completion: nil)
+    }
+
     // MARK: Actions
     
     @IBAction func cameraSwitchBtnTapped(_ sender: UIButton) {
